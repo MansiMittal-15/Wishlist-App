@@ -13,6 +13,6 @@ const router = express.Router();
 router.route("/add").post(isAuthenticated, upload.single('image'), addProduct);
 router.route("/update/:id").put(isAuthenticated, upload.single('image'), editProduct);
 router.route("/remove/:id").delete(isAuthenticated, removeProduct);
-router.route("/get").get(isAuthenticated, getProducts);
+router.route("/get").post(isAuthenticated, getProducts);
 
 export default router;

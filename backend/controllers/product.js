@@ -5,10 +5,10 @@ import {v2 as cloudinary} from 'cloudinary';
 
 export const addProduct = async (req, res) => {
   try {
-    const { name, price } = req.body;
+    const { name, price, wishlistId } = req.body;
     const userId = req.id;
 
-    if (!name || !price) {
+    if (!name || !price || !wishlistId) {
       return res.status(400).json({
         success: false,
         message: "Some data field is missing!",
@@ -21,7 +21,7 @@ export const addProduct = async (req, res) => {
         imageUrl = result.secure_url;
     }
 
-    const wishlist = await Wishlist.findOne({ createdBy: userId });
+    const wishlist = await Wishlist.findById(wishlistId);
     if (!wishlist) {
       return res.status(404).json({
         success: false,
@@ -90,6 +90,7 @@ export const editProduct = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "product updated successfully!",
+      updatedProduct: product,
     });
   } catch (error) {
     console.log(error);
@@ -124,7 +125,7 @@ export const removeProduct = async (req, res) => {
     }
 
     wishlist.products = wishlist.products.filter((prod) => {
-      prod._id.to_string() !== id;
+      return prod._id.toString() !== id;
     });
 
     await wishlist.save();

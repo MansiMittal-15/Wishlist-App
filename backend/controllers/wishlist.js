@@ -152,7 +152,7 @@ export const inviteToWishlist = async (req, res) => {
       });
     }
 
-    const user = await User.find({email});
+    const user = await User.findOne({email});
     if(!user) {
       return res.status(404).json({
         success: false,

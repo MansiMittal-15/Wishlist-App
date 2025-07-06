@@ -1,15 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, createWishlist } from "../utils/api";
+import { api, createWishlist, updateWishlist } from "../utils/api";
 import getWishlists from "../hooks/getWishlists";
 import { useDispatch, useSelector } from "react-redux";
 import { setWishlists } from "../redux/wishlistSlice";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
-const initialWishlists = [
-  { _id: 1, title: "Birthday Gifts" },
-  { _id: 2, title: "Home Decor" },
-];
+const EditForm = ({ value, onChange, onSubmit, onCancel }) => (
+  <div onClick={onCancel}
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+  >
+    <form 
+    onSubmit={onSubmit}
+    onClick={(e) => e.stopPropagation()}
+    className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+      <input
+        type="text"
+        placeholder="Edit wishlist name"
+        className="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+      />
+      <div className="flex gap-2 justify-end">
+        <button
+          type="button"
+          className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
+        >
+          Update
+        </button>
+      </div>
+    </form>
+  </div>
+);
 
 const Wishlist = () => {
   const [newWishlistName, setNewWishlistName] = useState("");
@@ -53,32 +83,43 @@ const Wishlist = () => {
     }
   };
 
-  const handleEdit = async (id) => {
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    if (!editingName.trim()) return;
+
     try {
-    } catch (error) {}
+      const res = await updateWishlist(editingId, editingName);
+      if (res?.data?.success) {
+        const updatedWishlists = wishlists.map((wishlist) =>
+          wishlist._id === editingId
+            ? { ...wishlist, title: editingName }
+            : wishlist
+        );
+        dispatch(setWishlists(updatedWishlists));
+        setShowEditForm(false);
+        setEditingName("");
+        setEditingId("");
+        setToast({ success: true, message: "Wishlist updated successfully!" });
+      }
+    } catch (error) {
+      console.log(error);
+      setToast({
+        success: false,
+        message: error.response?.data?.message || "Network error",
+      });
+    }
   };
 
-  const EditForm = () => {
-    return (
-      <div onClick={() => setShowEditForm(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-        <form onClick={(e) => e.stopPropagation()} className="w-5xl justify-center items-center gap-2 flex bg-white p-10 rounded-lg">
-          <input
-            type="text"
-            placeholder="New wishlist name"
-            className="flex-1 px-3 py-2 w-[80%] border rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
-            value={newWishlistName}
-            onChange={(e) => setNewWishlistName(e.target.value)}
-            required
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
-          >
-            Update
-          </button>
-        </form>
-      </div>
-    );
+  const handleEditClick = (wishlist) => {
+    setEditingName(wishlist.title);
+    setEditingId(wishlist._id);
+    setShowEditForm(true);
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditForm(false);
+    setEditingName("");
+    setEditingId("");
   };
 
   const Toast = ({ toastData, onClose, duration = 2500 }) => {
@@ -174,7 +215,7 @@ const Wishlist = () => {
           {wishlists.map((w) => (
             <li key={w._id}>
               <button
-                onClick={() => navigate(`/wishlist/${w.id}`)}
+                onClick={() => navigate(`/wishlist/${w._id}`)}
                 className="flex items-center justify-between w-full text-left px-4 py-3 rounded-lg mb-2 font-medium transition bg-purple-50 hover:bg-purple-100 text-purple-700 shadow"
               >
                 <div className="w-full text-left mb-2 font-medium text-purple-700 ">
@@ -185,10 +226,7 @@ const Wishlist = () => {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <FaEdit
-                    onClick={() => {
-                      setShowEditForm(true);
-                      setEditingId(w._id);
-                    }}
+                    onClick={() => handleEditClick(w)}
                     className="cursor-pointer"
                   />
                   <FaTrash
@@ -202,7 +240,14 @@ const Wishlist = () => {
         </ul>
       </div>
       {toast && <Toast toastData={toast} onClose={() => setToast(null)} />}
-      {showEditForm && <EditForm />}
+      {showEditForm && (
+        <EditForm 
+          value={editingName} 
+          onChange={setEditingName}
+          onSubmit={handleEdit}
+          onCancel={handleCancelEdit}
+        />
+      )}
     </section>
   );
 };
