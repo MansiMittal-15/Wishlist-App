@@ -6,6 +6,8 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+const token = localStorage.getItem("token");
+
 export const login = async (userData) => {
   try {
     const res = await api.post("/user/login", userData, {
@@ -15,7 +17,6 @@ export const login = async (userData) => {
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response?.data?.message || "Network error");
   }
 };
@@ -29,31 +30,20 @@ export const register = async (userData) => {
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response.data.message || "Network error");
   }
 };
-
-export const logout = async () => {
-  try {
-    const res = await api.get('/user/logout');
-    return res;
-  } catch (error) {
-    console.log(error);
-    toast.error(error.response.data.message || "Network error");
-  }
-}
 
 export const createWishlist = async (title) => {
   try {
     const res = await api.post('/wishlist/create', {title}, {
       headers: {
         'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
       },
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response.data.message || "Network error");
   }
 }
@@ -63,11 +53,11 @@ export const updateWishlist = async (id, title) => {
     const res = await api.put(`/wishlist/update/${id}`, {title}, {
       headers: {
         'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
       },
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response.data.message || "Network error");
   }
 }
@@ -77,11 +67,11 @@ export const getProducts = async (wishlistId) => {
     const res = await api.post('/product/get', {wishlistId}, {
       headers: {
         'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
       },
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response?.data?.message || "Network error");
   }
 }
@@ -99,11 +89,11 @@ export const addProduct = async (productData) => {
     const res = await api.post('/product/add', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: "Bearer " + token,
       },
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response?.data?.message || "Network error");
   }
 }
@@ -121,11 +111,11 @@ export const editProduct = async (productId, productData) => {
     const res = await api.put(`/product/update/${productId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: "Bearer " + token,
       },
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response?.data?.message || "Network error");
   }
 }
@@ -136,11 +126,11 @@ export const removeProduct = async (productId, wishlistId) => {
       data: { wishlistId },
       headers: {
         'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
       },
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response?.data?.message || "Network error");
   }
 }
@@ -150,11 +140,11 @@ export const inviteToWishlist = async (wishlistId, email) => {
     const res = await api.post(`/wishlist/invite/${wishlistId}`, { email }, {
       headers: {
         'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
       },
     });
     return res;
   } catch (error) {
-    console.log(error);
     toast.error(error.response?.data?.message || "Network error");
   }
 }

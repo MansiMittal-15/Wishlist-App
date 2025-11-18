@@ -1,5 +1,3 @@
-import React from 'react';
-
 const features = [
   {
     icon: (
@@ -25,13 +23,6 @@ const features = [
     desc: 'See who added what, and customize your wishlist.',
     color: 'from-yellow-300 to-purple-400',
   }
-];
-
-const trustedLogos = [
-  'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg',
-  'https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png',
-  'https://upload.wikimedia.org/wikipedia/commons/5/51/Google.png',
-  'https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_TV_2015.png',
 ];
 
 const Home = () => (

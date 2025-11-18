@@ -49,6 +49,7 @@ const Wishlist = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingName, setEditingName] = useState("");
   const [editingId, setEditingId] = useState('');
+  const token = localStorage.getItem("token")
 
   const { wishlists } = useSelector((store) => store.wishlist);
 
@@ -68,14 +69,17 @@ const Wishlist = () => {
 
   const handleDelete = async (id) => {
     try {
-      const res = await api.delete(`/wishlist/remove/${id}`);
+      const res = await api.delete(`/wishlist/remove/${id}`, {
+        headers: {
+          Authorization: "Bearer " + token,
+        }
+      });
       if (res.data.success) {
         setToast({ success: true, message: res.data.message });
         const updatedWishlists = wishlists.filter((item) => item._id !== id);
         dispatch(setWishlists(updatedWishlists));
       }
     } catch (error) {
-      console.log(error);
       setToast({
         success: false,
         message: error.response.data.message || "Network error",
@@ -102,7 +106,6 @@ const Wishlist = () => {
         setToast({ success: true, message: "Wishlist updated successfully!" });
       }
     } catch (error) {
-      console.log(error);
       setToast({
         success: false,
         message: error.response?.data?.message || "Network error",
@@ -211,6 +214,11 @@ const Wishlist = () => {
             Create
           </button>
         </form>
+        <div>
+          {wishlists.length === 0 && <div>
+            No wishlist created yet!
+            </div>}
+        </div>
         <ul>
           {wishlists.map((w) => (
             <li key={w._id}>

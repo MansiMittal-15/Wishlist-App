@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../utils/api.js";
 import { useDispatch } from "react-redux";
@@ -15,6 +15,7 @@ const Login = () => {
     const res = await login({email, password});
     if (res?.data?.success) {
       dispatch(setUser(res.data.user));
+      localStorage.setItem("token", res.data.token);
       toast.success(res.data.message);
       navigate("/");
     }

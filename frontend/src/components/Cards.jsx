@@ -1,5 +1,3 @@
-import React from 'react'
-
 const Cards = ({ title, description, price, rating, image }) => {
   return (
     <div className='w-auto h-auto rounded-2xl border-2 border-slate-300 overflow-hidden shadow-2xs'>

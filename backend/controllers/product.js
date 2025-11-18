@@ -43,7 +43,7 @@ export const addProduct = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Product added successfully!",
-      newProduct,
+      newProduct: wishlist.products[wishlist.products.length-1],
     });
   } catch (error) {
     console.log(error);

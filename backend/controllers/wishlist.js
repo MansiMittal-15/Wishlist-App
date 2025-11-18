@@ -145,6 +145,7 @@ export const inviteToWishlist = async (req, res) => {
   try {
     const {email} = req.body;
     const {id} = req.params;
+    const userId = req.id;
     if(!email) {
       return res.status(400).json({
         success: false,
@@ -158,6 +159,14 @@ export const inviteToWishlist = async (req, res) => {
         success: false,
         message: 'no user exits with providedd email id!',
       });
+    }
+
+    const fromUser = await User.findById(userId);
+    if(fromUser && fromUser.email === email) {
+      return res.status(400).json({
+        success: false,
+        message: "Can't share the wishlist to yourself!"
+      })
     }
 
     const wishlist = await Wishlist.findById(id);

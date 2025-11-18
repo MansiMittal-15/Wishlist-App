@@ -172,18 +172,22 @@ const WishlistDetail = () => {
   const [product, setProduct] = useState({ name: "", price: "", image: null });
   const [inviteEmail, setInviteEmail] = useState("");
   const [toast, setToast] = useState(null);
+  const token = localStorage.getItem("token");
 
   const wishlist = useSelector((state) => state.wishlist.singleWishlist);
 
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        const response = await api.get(`/wishlist/get/${id}`);
+        const response = await api.get(`/wishlist/get/${id}`, {
+          headers: {
+            Authorization: "Bearer " + token,
+          }
+        });
         if (response.data.success) {
           dispatch(setSingleWishlist(response.data.wishlist));
         }
       } catch (error) {
-        console.error("Error fetching wishlist:", error);
         setToast({ success: false, message: "Failed to fetch wishlist" });
       }
     };
@@ -230,7 +234,6 @@ const WishlistDetail = () => {
         setToast({ success: true, message: "Product added successfully!" });
       }
     } catch (error) {
-      console.error("Error adding product:", error);
       setToast({ success: false, message: "Failed to add product" });
     }
   };
@@ -247,10 +250,7 @@ const WishlistDetail = () => {
         wishlistId: wishlist._id,
         image: product.image,
       };
-
-      console.log("Editing product with data:", productData);
       const res = await editProduct(editingProduct._id, productData);
-      console.log("Edit product response:", res?.data);
 
       if (res?.data?.success) {
         // Update the product in the wishlist using the returned updated product data
@@ -265,7 +265,6 @@ const WishlistDetail = () => {
         setToast({ success: true, message: "Product updated successfully!" });
       }
     } catch (error) {
-      console.error("Error updating product:", error);
       setToast({ success: false, message: "Failed to update product" });
     }
   };
@@ -273,17 +272,8 @@ const WishlistDetail = () => {
   // Remove product
   const handleRemoveProduct = async (productId) => {
     try {
-      console.log(
-        "Removing product:",
-        productId,
-        "from wishlist:",
-        wishlist._id
-      );
       const res = await removeProduct(productId, wishlist._id);
-      console.log("Remove product response:", res);
-
       if (res?.data?.success) {
-        // Remove the product from the wishlist
         const updatedProducts = wishlist.products.filter(
           (p) => p._id !== productId
         );
@@ -297,7 +287,6 @@ const WishlistDetail = () => {
         });
       }
     } catch (error) {
-      console.error("Error removing product:", error);
       setToast({
         success: false,
         message: error.response?.data?.message || "Failed to remove product",
@@ -324,7 +313,6 @@ const WishlistDetail = () => {
         setToast({ success: true, message: "Invitation sent successfully!" });
       }
     } catch (error) {
-      console.error("Error inviting person:", error);
       setToast({
         success: false,
         message: error.response?.data?.message || "Failed to send invitation",
@@ -535,7 +523,7 @@ const WishlistDetail = () => {
                     </span>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleEditClick(item)}
+                        onClick={() =>handleEditClick(item)}
                         className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                         title="Edit product"
                       >
