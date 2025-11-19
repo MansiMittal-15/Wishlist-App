@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
-import { addProduct, api, editProduct, removeProduct, inviteToWishlist } from "../utils/api";
+import {
+  addProduct,
+  api,
+  editProduct,
+  removeProduct,
+  inviteToWishlist,
+  removeFromWishlist,
+} from "../utils/api";
 import { setSingleWishlist } from "../redux/wishlistSlice";
-import { FaEdit, FaTrash, FaPlus, FaUserPlus, FaTimes } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaUserPlus,
+  FaTimes,
+  FaDumpster,
+} from "react-icons/fa";
 
 const AddProductModal = ({ onClose, onSubmit, product, setProduct }) => (
   <div
@@ -123,7 +137,12 @@ const EditProductModal = ({ onClose, onSubmit, product, setProduct }) => (
   </div>
 );
 
-const InvitePersonModal = ({ onClose, onSubmit, inviteEmail, setInviteEmail }) => (
+const InvitePersonModal = ({
+  onClose,
+  onSubmit,
+  inviteEmail,
+  setInviteEmail,
+}) => (
   <div
     className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
     onClick={onClose}
@@ -173,6 +192,7 @@ const WishlistDetail = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [toast, setToast] = useState(null);
   const token = localStorage.getItem("token");
+  const [showRemove, setShowRemove] = useState(false);
 
   const wishlist = useSelector((state) => state.wishlist.singleWishlist);
 
@@ -182,7 +202,7 @@ const WishlistDetail = () => {
         const response = await api.get(`/wishlist/get/${id}`, {
           headers: {
             Authorization: "Bearer " + token,
-          }
+          },
         });
         if (response.data.success) {
           dispatch(setSingleWishlist(response.data.wishlist));
@@ -305,7 +325,7 @@ const WishlistDetail = () => {
         // Update the wishlist with the new invite
         const updatedWishlist = {
           ...wishlist,
-          sharedWith: [...wishlist.sharedWith, inviteEmail],
+          sharedWith: res.data.sharedWith,
         };
         dispatch(setSingleWishlist(updatedWishlist));
         setInviteEmail("");
@@ -319,6 +339,28 @@ const WishlistDetail = () => {
       });
     }
   };
+
+  const handleRemoveFromInvite = async (email)=>{
+    try {
+      const res = await removeFromWishlist(wishlist._id, email);
+      if (res?.data?.success) {
+        // Update the wishlist with the new invite
+        const updatedWishlist = {
+          ...wishlist,
+          sharedWith: res.data.sharedWith,
+        };
+        dispatch(setSingleWishlist(updatedWishlist));
+        setInviteEmail("");
+        setShowInvitePerson(false);
+        setToast({ success: true, message: "Invitation sent successfully!" });
+      }
+    } catch (error) {
+      setToast({
+        success: false,
+        message: error.response?.data?.message || "Failed to send invitation",
+      });
+    }
+  }
 
   // Handle edit click
   const handleEditClick = (product) => {
@@ -460,16 +502,31 @@ const WishlistDetail = () => {
               wishlist.sharedWith.map((email, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                  onMouseEnter={() => {
+                    setShowRemove(true);
+                  }}
+                  onMouseLeave={() => {
+                    setShowRemove(false);
+                  }}
+                  className="flex items-center gap-2 relative px-3 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
                 >
                   <div className="w-6 h-6 bg-purple-400 text-white rounded-full flex items-center justify-center text-xs font-bold">
                     {getInitials(email)}
                   </div>
                   <span>{email}</span>
+                  {showRemove && (
+                    <div onClick={()=>{
+                      handleRemoveFromInvite(email)
+                    }} className="bg-purple-300 cursor-pointer w-7 h-7 flex justify-center items-center rounded-full absolute right-2 ">
+                      <FaTrash />
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">No one has been invited yet.</p>
+              <p className="text-gray-500 text-sm">
+                No one has been invited yet.
+              </p>
             )}
           </div>
         </div>
@@ -492,7 +549,9 @@ const WishlistDetail = () => {
               <div className="text-center py-12 text-gray-400 bg-gray-50 rounded-lg">
                 <FaPlus className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p className="text-lg font-medium">No products yet</p>
-                <p className="text-sm">Add your first product to get started!</p>
+                <p className="text-sm">
+                  Add your first product to get started!
+                </p>
               </div>
             ) : (
               wishlist.products?.map((item) => (
@@ -513,7 +572,8 @@ const WishlistDetail = () => {
                         {item.name}
                       </h5>
                       <p className="text-sm text-gray-500">
-                        Added on: {new Date(item.createdAt).toLocaleDateString()}
+                        Added on:{" "}
+                        {new Date(item.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -523,7 +583,7 @@ const WishlistDetail = () => {
                     </span>
                     <div className="flex gap-2">
                       <button
-                        onClick={() =>handleEditClick(item)}
+                        onClick={() => handleEditClick(item)}
                         className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                         title="Edit product"
                       >

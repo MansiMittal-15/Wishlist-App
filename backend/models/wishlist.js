@@ -1,5 +1,4 @@
-import { timeStamp } from "console";
-import mongoose, { model } from "mongoose";
+import mongoose from "mongoose";
 
 const wishlistSchema = new mongoose.Schema(
   {

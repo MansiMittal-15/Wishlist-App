@@ -147,4 +147,18 @@ export const inviteToWishlist = async (wishlistId, email) => {
   } catch (error) {
     toast.error(error.response?.data?.message || "Network error");
   }
+};
+
+export const removeFromWishlist = async (wishlistId, email) => {
+  try {
+    const res = await api.post(`/wishlist/removeInvite/${wishlistId}`, { email }, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: "Bearer " + token,
+      },
+    });
+    return res;
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Network error");
+  }
 }

@@ -157,7 +157,7 @@ export const inviteToWishlist = async (req, res) => {
     if(!user) {
       return res.status(404).json({
         success: false,
-        message: 'no user exits with providedd email id!',
+        message: 'no user exits with provided email id!',
       });
     }
 
@@ -176,15 +176,60 @@ export const inviteToWishlist = async (req, res) => {
         message: 'No wishlist found!',
       });
     }
-
-    if(!wishlist.sharedWith.includes(email)) {
-      wishlist.sharedWith.push(email);
+    if(wishlist.sharedWith.includes(email)) {
+       return res.status(400).json({
+        success: false,
+        message: 'User already invited!',
+      });
     }
+    
+    wishlist.sharedWith.push(email);
+    await wishlist.save();
+    return res.status(200).json({
+      success: true,
+      message: 'User invited successfully!',
+      sharedWith: wishlist.sharedWith
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const removeFromWishlist = async (req, res) => {
+  try {
+    const {email} = req.body;
+    const {id} = req.params;
+    const userId = req.id;
+    if(!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required!',
+      });
+    }
+
+    const user = await User.findOne({email});
+    if(!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'no user exits with provided email id!',
+      });
+    }
+
+    const wishlist = await Wishlist.findById(id);
+    if(!wishlist) {
+      return res.status(404).json({
+        success: false,
+        message: 'No wishlist found!',
+      });
+    }
+
+    wishlist.sharedWith = wishlist.sharedWith.filter((item)=> item !== email);
 
     await wishlist.save();
     return res.status(200).json({
       success: true,
       message: 'User invited successfully!',
+      sharedWith: wishlist.sharedWith,
     });
   } catch (error) {
     console.log(error);

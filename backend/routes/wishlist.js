@@ -5,6 +5,7 @@ import {
   getSingleWishlist,
   getUserWishlists,
   inviteToWishlist,
+  removeFromWishlist,
   removeWishlist,
 } from "../controllers/wishlist.js";
 import { isAuthenticated } from "../middlewares/isAuthenticated.js";
@@ -17,5 +18,6 @@ router.route("/create").post(isAuthenticated, createWishlist);
 router.route("/update/:id").put(isAuthenticated, editWishlist);
 router.route("/remove/:id").delete(isAuthenticated, removeWishlist);
 router.route("/invite/:id").post(isAuthenticated, inviteToWishlist);
+router.route("/removeInvite/:id").post(isAuthenticated, removeFromWishlist);
 
 export default router;
